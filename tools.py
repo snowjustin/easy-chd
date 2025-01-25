@@ -9,6 +9,7 @@ CUE = ".cue"
 GDI = ".gdi"
 ISO = ".iso"
 VALID_FORMATS = [CHD, CUE, GDI, ISO]
+CHDMAN_OUTPUT_VERIFICATION = "chdman - MAME Compressed Hunks of Data (CHD) manager"
 
 class FileConverter:
     def __init__(self, debug=False):
@@ -42,7 +43,7 @@ class FileConverter:
     def __test_chdman_installed(self):
         test_run = subprocess.run(["chdman"], capture_output=True, shell=True, text=True)
         chdman_output = test_run.stdout.splitlines()[0]
-        if "chdman - MAME Compressed Hunks of Data (CHD) manager" in chdman_output:
+        if CHDMAN_OUTPUT_VERIFICATION in chdman_output:
             return True
         else:
             return False

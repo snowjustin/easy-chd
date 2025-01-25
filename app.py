@@ -63,7 +63,7 @@ class App(customtkinter.CTk):
         self.directory_label = customtkinter.CTkLabel(
             master=self,
             textvariable=self.selected_directory,
-            font=customtkinter.CTkFont(family="monospace", size=15, slant="italic"),
+            font=customtkinter.CTkFont(size=15, slant="italic", weight="bold"),
             width=510,
             anchor="w"
         )
@@ -162,9 +162,11 @@ class App(customtkinter.CTk):
         # Draw new list
         if self.file_list != {}:
             for f in self.file_list.keys():
+                fname = self.file_list[f]["filename"]
+                ftype = self.file_list[f]["filetype"]
                 switch = customtkinter.CTkCheckBox(
                     master=self.scrollable_frame, 
-                    text=f"{self.file_list[f]["filename"]} - {self.file_list[f]["filetype"]}",
+                    text=f"{fname} - {ftype}",
                     variable=self.file_list[f]["convertstate"]
                 )
                 switch.grid(row=len(self.scrollable_frame_switches), column=0, padx=10, pady=(0, 20), sticky="w")
