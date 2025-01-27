@@ -10,16 +10,16 @@ customtkinter.set_default_color_theme("green")
 
 #  CONSTANTS
 VALID_FILE_TYPES = ['.chd', '.cue', '.gdi', '.iso']
-WINDOW_WIDTH = 1100
+WINDOW_WIDTH = 978
 WINDOW_HEIGHT = 630
 APP_TITLE = "Easy CHD"
 NO_DIRECTORY_TEXT = "No directory selected"
 
 
+
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-        self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
         self.title(APP_TITLE)
         self.converter = FileConverter()
         self.selected_directory = customtkinter.StringVar(master=self, value=NO_DIRECTORY_TEXT)
@@ -27,78 +27,66 @@ class App(customtkinter.CTk):
         self.output_format = customtkinter.StringVar(master=self, value='.chd')
         self.scrollable_frame_switches = []  # stores widgets displayed in scrollable list.
 
-        # set grid layout 4x4
-        self.grid_columnconfigure((2,3), weight=1)
-        self.grid_columnconfigure((0,1), weight=2)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=1)
-        self.grid_rowconfigure(3, weight=17)
+        # Font settings
+        self.LABEL_FONT = customtkinter.CTkFont(size=15)
+        self.RESULT_FONT = customtkinter.CTkFont(size=15, slant="italic")
+        self.TITLE_FONT = customtkinter.CTkFont(size=30, weight="bold")
 
         # App title settings
         self.app_title_label = customtkinter.CTkLabel(
             master=self,
             text=APP_TITLE,
-            font=customtkinter.CTkFont(size=30, weight="bold"),
-            height=50
+            font=self.TITLE_FONT,
+            width=WINDOW_WIDTH
         )
-        self.app_title_label.grid(
-            row=0, 
-            column=0, 
-            columnspan=4, 
-            padx=20, 
-            pady=(10, 10), 
-            sticky="nsew"
+        self.app_title_label.pack(
+            padx=5,
+            pady=(20, 10),
         )
 
         # Tab creation
         self.tabview = customtkinter.CTkTabview(master=self)
-        self.tabview.grid(
-            row=1,
-            column=0,
-            columnspan=4,
+        self.tabview.pack(
             padx=20,
-            pady=(0,20),
-            sticky="nsew"
+            pady=(0, 20),
+            fill="both",
+            expand=True
         )
         self.sf_tab = self.tabview.add("Single File")
         self.mf_tab = self.tabview.add("Multiple Files")
         self.tabview.set("Multiple Files")
 
-        # Directory selection
+        # Multiple file selection
+        # Directory selection widgets
         self.directory_info_label = customtkinter.CTkLabel(
             master=self.mf_tab,
             text="Select directory:",
-            font=customtkinter.CTkFont(size=15),
+            font=self.LABEL_FONT,
             anchor="w"
         )
-        self.directory_info_label.grid(row=0, column=0, sticky="e", padx=20)
         self.directory_browse_button = customtkinter.CTkButton(master=self.mf_tab, text="Select", command=self.get_directory)
-        self.directory_browse_button.grid(row=0, column=1, padx=(20, 10), pady=10, sticky="w")
         self.directory_label = customtkinter.CTkLabel(
             master=self.mf_tab,
             textvariable=self.selected_directory,
-            font=customtkinter.CTkFont(size=15, slant="italic", weight="bold"),
+            font=self.RESULT_FONT,
             width=510,
             anchor="w"
         )
-        self.directory_label.grid(row=0, column=2, padx=(0, 20), pady=10, sticky="w")
-        self.search_progressbar = customtkinter.CTkProgressBar(master=self.mf_tab, mode="indeterminate")
-        self.search_progressbar.grid(row=1, column=2)# columnspan=3, padx=(20, 20), pady=(10, 0), sticky="ew")
-        self.search_progressbar.grid_forget()
-        self.search_text = customtkinter.StringVar(value="")
-        self.search_text_label = customtkinter.CTkLabel(master=self.mf_tab, textvariable=self.search_text, anchor="e")
-        self.search_text_label.grid(row=1, column=1, sticky="ew", padx=(20,10), pady=10)
 
-        # Progress bar components
+        self.directory_info_label.grid(row=0, column=0, sticky="e", padx=20, pady=10)
+        self.directory_browse_button.grid(row=0, column=1, padx=(20, 10), pady=10, sticky="w")
+        self.directory_label.grid(row=0, column=2, padx=(0, 20), pady=10, sticky="w")
+        
+        # Convert Widgets
         self.convert_button = customtkinter.CTkButton(self.mf_tab, text="Convert Files", state="disabled", command=self.convert_files)
+        self.progressbar = customtkinter.CTkProgressBar(master=self.mf_tab, mode="indeterminate")
+        self.progressbar_text = customtkinter.StringVar(value="")
+        self.progressbar_label = customtkinter.CTkLabel(master=self.mf_tab, textvariable=self.progressbar_text, anchor="e")
+
         self.convert_button.grid(row=10, column=0, padx=(20, 10), pady=(10, 10), sticky="w")
-        self.convert_progressbar = customtkinter.CTkProgressBar(master=self.mf_tab, width=510)
-        self.convert_progressbar.grid(row=10, column=1, columnspan=3, padx=(20, 20), pady=(10, 0), sticky="ew")
-        self.convert_progressbar.grid_forget()
-        self.convert_progress_text = customtkinter.StringVar(value="")
-        self.convert_progress_label = customtkinter.CTkLabel(master=self.mf_tab, textvariable=self.convert_progress_text, anchor="e", width=510)
-        self.convert_progress_label.grid(row=11, column=1, columnspan=3, padx=(0,20), pady=10, sticky="ew")
+        self.progressbar.grid(row=10, column=1, columnspan=3, padx=(20, 20), pady=(10, 0), sticky="ew")
+        self.progressbar.grid_forget()
+        self.progressbar_label.grid(row=11, column=1, columnspan=3, padx=(0,20), pady=10, sticky="ew")
 
         # List of selectable files
         self.scrollable_frame = customtkinter.CTkScrollableFrame(self.mf_tab, label_text="Files Found", label_anchor="w")
@@ -110,7 +98,7 @@ class App(customtkinter.CTk):
         self.conversion_output_format_label = customtkinter.CTkLabel(
             master=self.mf_tab,
             text="Output conversion format:",
-            font=customtkinter.CTkFont(size=15)
+            font=self.LABEL_FONT
         )
         self.conversion_output_format_label.grid(row=4, column=0, padx=20, pady=10, sticky="e")
         self.conversion_output_format_selector = customtkinter.CTkOptionMenu(
@@ -132,6 +120,28 @@ class App(customtkinter.CTk):
                 switch.configure(state=ui_state)
         self.conversion_output_format_selector.configure(state=ui_state)
 
+    def interact_with_progressbar(self, state="start", mode="search"):
+        valid_state_inputs = ["start", "stop"]
+        valid_mode_inputs = ["search", "convert"]
+
+        if state not in valid_state_inputs or mode not in valid_mode_inputs:
+            raise ProgressBarException()
+        
+        if state == "stop":
+            self.progressbar_text.set("")
+            self.progressbar.stop()
+            self.progressbar.grid_forget()
+        else:
+            if mode == "search":
+                self.progressbar.configure(progress_color="darkorange")
+                self.progressbar_text.set("Searching directory...")
+            else:
+                self.progressbar.configure(progress_color="mediumorchid")
+                self.progressbar_text.set("Checking files for conversion...")
+
+            self.progressbar.grid(row=10, column=1, columnspan=3, padx=(20, 20), pady=(10, 0), sticky="ew")
+            self.progressbar.start()
+
     def get_directory(self):
         new_dir = askdirectory(mustexist=True)
         if new_dir != "":
@@ -143,10 +153,7 @@ class App(customtkinter.CTk):
         # Draw a progress bar to distract us and disable 
         # things that shouldn't be clicked while a search is ongoing
         self.toggle_ui_state("disabled")
-        self.search_text.set("Searching...")
-        self.search_progressbar.grid(row=2, column=2, padx=20, pady=20, sticky="ew")
-        self.search_progressbar.start()
-        
+        self.interact_with_progressbar(state="start", mode="search")
         # Actually walk the path and build a list of components with files.
         def build_file_list():
             self.file_list = {}
@@ -161,10 +168,8 @@ class App(customtkinter.CTk):
             
             # Let the app go back to functioning as normal
             self.toggle_ui_state("enabled")
+            self.interact_with_progressbar(state="stop")
             self.draw_file_list()
-            self.search_progressbar.stop()
-            self.search_text.set("")
-            self.search_progressbar.grid_forget()
 
         threading.Thread(target=build_file_list, daemon=True).start()
 
@@ -195,27 +200,23 @@ class App(customtkinter.CTk):
         """Convert selected files from checkboxes into desired format."""
         # Update UI
         self.toggle_ui_state("disabled")
-        self.convert_progress_text.set(f"Checking files for conversion")
+        self.interact_with_progressbar(state="start", mode="convert")
         conversion_list = [f for f in self.file_list.keys() if self.file_list[f]["convertstate"].get()]
         total_files = len(conversion_list)
         
         # Exit the function and fix UI if there are no files selected for conversion
         if total_files == 0:
             self.toggle_ui_state()
-            self.convert_progress_text.configure(text="")
+            self.interact_with_progressbar(state="stop")
             return
         
-        # Determinate speed is a value divided by 50 for whatever reason in the customtkinter code.
-        # Here I am essentially changing that value from 50 to the number of total files so that the
-        # progress bar should increment once for each file that is being converted.
-        self.convert_progressbar.configure(determinate_speed=50/total_files)  
-        self.convert_progressbar.set(value=0)
-        self.convert_progressbar.grid(row=10, column=1, columnspan=3, padx=(20, 20), pady=(10, 0), sticky="ew")
+        self.progressbar.grid(row=10, column=1, columnspan=3, padx=(20, 20), pady=(10, 0), sticky="ew")
         
         def run_conversion():
+            current_file = 1
             for f in conversion_list:
-                self.convert_progress_text.set(f"Converting {f}")
-                self.convert_progressbar.step()
+                self.progressbar_text.set(f"Converting {f} - {current_file}/{total_files}")
+                self.progressbar.step()
                 self.converter.convert_file(
                     input_file=Path(f),
                     output_directory=Path(f).parent,
@@ -223,13 +224,23 @@ class App(customtkinter.CTk):
                 )
             
             self.toggle_ui_state()
-            self.convert_progress_text.set(f"Conversion Completed.")
+            self.interact_with_progressbar(state="stop")
+            self.progressbar_text.set(f"Conversion Completed.")
         
         # Begin the conversion in a different thread
         threading.Thread(target=run_conversion, daemon=True).start()
 
 
+
+class ProgressBarException(Exception):
+    def __init__(self, *args):
+        super().__init__(*args)
+
+
+
 if __name__ == "__main__":
     app = App()
+    app.minsize(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
+    app.resizable(width=False, height=False)
     app.eval('tk::PlaceWindow . center')
     app.mainloop()
