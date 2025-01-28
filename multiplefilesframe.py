@@ -3,13 +3,14 @@ import customtkinter
 from pathlib import Path
 import threading
 from tools import FileConverter
+from exceptions import ProgressBarException
 
 VALID_FILE_TYPES = ['.chd', '.cue', '.gdi', '.iso']
 NO_DIRECTORY_TEXT = "No directory selected"
 
 class MultipleFilesFrame(customtkinter.CTkFrame):
     def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)    
+        super().__init__(master, **kwargs)
     
         self.converter = FileConverter()
         self.selected_directory = customtkinter.StringVar(master=self, value=NO_DIRECTORY_TEXT)
@@ -32,7 +33,8 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
             textvariable=self.selected_directory,
             font=self.RESULT_FONT,
             width=510,
-            anchor="w"
+            anchor="w",
+            text_color="darkorange"
         )
 
         self.directory_info_label.grid(row=0, column=0, sticky="e", padx=20, pady=10)
@@ -178,9 +180,8 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
             current_file = 1
             for f in conversion_list:
                 self.progressbar_text.set(f"Converting {f} - {current_file}/{total_files}")
-                self.progressbar.step()
                 self.converter.convert_file(
-                    inputupd_file=Path(f),
+                    input_file=Path(f),
                     output_directory=Path(f).parent,
                     output_format=self.output_format.get()
                 )
@@ -191,9 +192,3 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
         
         # Begin the conversion in a different thread
         threading.Thread(target=run_conversion, daemon=True).start()
-
-
-
-class ProgressBarException(Exception):
-    def __init__(self, *args):
-        super().__init__(*args)

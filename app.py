@@ -1,5 +1,6 @@
 import customtkinter
 from multiplefilesframe import MultipleFilesFrame
+from singlefileframe import SingleFileFrame
 
 # Theme settings
 customtkinter.set_appearance_mode("System")
@@ -41,12 +42,12 @@ class App(customtkinter.CTk):
             expand=True
         )
         self.sf_tab = self.tabview.add("Single File")
+        self.sf_view = SingleFileFrame(self.sf_tab)
+        self.sf_view.pack()
         self.mf_tab = self.tabview.add("Multiple Files")
-
         self.mf_view = MultipleFilesFrame(self.mf_tab)
         self.mf_view.pack()
-        
-        self.tabview.set("Multiple Files")
+        self.tabview.set("Single File")
 
 
 
