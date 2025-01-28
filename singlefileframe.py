@@ -37,7 +37,7 @@ class SingleFileFrame(customtkinter.CTkFrame):
             text_color="darkorange"
         )
         
-        # Convert Widgets
+        # Convert widgets
         self.convert_button = customtkinter.CTkButton(self, text="Convert File", state="disabled", command=self.convert_file)
         self.progressbar = customtkinter.CTkProgressBar(master=self, mode="indeterminate")
         self.progressbar_text = customtkinter.StringVar(value="")
@@ -64,7 +64,7 @@ class SingleFileFrame(customtkinter.CTkFrame):
         self.conversion_output_format_selector.grid(row=20, column=1, padx=(10, 20), pady=10,sticky="w")
         self.convert_button.grid(row=30, column=0, columnspan=2, padx=(20, 20), pady=10)
         self.progressbar.grid(row=31, column=0, columnspan=2, padx=20, pady=(10, 0), sticky="ew")
-        self.progressbar.grid_forget()
+        self.progressbar.grid_forget()  # initially hide the progress bar
         self.progressbar_label.grid(row=32, column=0, columnspan=2, padx=20, pady=10)
 
     def toggle_ui_state(self, ui_state="enabled"):

@@ -1,14 +1,10 @@
 # This is a utility library for converting different games
 import subprocess
 from pathlib import Path
-import shlex
+from exceptions import ChdmanNotInstalledError, FileConversionError, FileFormatNotSupportedError
+from constants import *
 
 # File Formats
-CHD = ".chd"
-CUE = ".cue"
-GDI = ".gdi"
-ISO = ".iso"
-VALID_FORMATS = [CHD, CUE, GDI, ISO]
 CHDMAN_OUTPUT_VERIFICATION = "chdman - MAME Compressed Hunks of Data (CHD) manager"
 
 class FileConverter:

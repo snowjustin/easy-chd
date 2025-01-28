@@ -10,7 +10,8 @@ customtkinter.set_default_color_theme("green")
 WINDOW_WIDTH = 978
 WINDOW_HEIGHT = 630
 APP_TITLE = "Easy CHD"
-
+SF_TAB = "Single File"
+MF_TAB = "Multiple Files"
 
 
 class App(customtkinter.CTk):
@@ -19,13 +20,13 @@ class App(customtkinter.CTk):
         self.title(APP_TITLE)
 
         # Font settings
-        self.TITLE_FONT = customtkinter.CTkFont(size=30, weight="bold")
+        self.title_font = customtkinter.CTkFont(size=30, weight="bold", slant="italic")
 
         # App title settings
         self.app_title_label = customtkinter.CTkLabel(
             master=self,
             text=APP_TITLE,
-            font=self.TITLE_FONT,
+            font=self.title_font,
             width=WINDOW_WIDTH
         )
         self.app_title_label.pack(
@@ -41,13 +42,13 @@ class App(customtkinter.CTk):
             fill="both",
             expand=True
         )
-        self.sf_tab = self.tabview.add("Single File")
+        self.sf_tab = self.tabview.add(SF_TAB)
         self.sf_view = SingleFileFrame(self.sf_tab)
         self.sf_view.pack()
-        self.mf_tab = self.tabview.add("Multiple Files")
+        self.mf_tab = self.tabview.add(MF_TAB)
         self.mf_view = MultipleFilesFrame(self.mf_tab)
         self.mf_view.pack()
-        self.tabview.set("Single File")
+        self.tabview.set(SF_TAB)
 
 
 
