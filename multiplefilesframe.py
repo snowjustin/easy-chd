@@ -2,7 +2,6 @@ from tkinter.filedialog import askdirectory
 import customtkinter
 from pathlib import Path
 import threading
-from tools import FileConverter
 from exceptions import ProgressBarException
 from constants import *
 
@@ -13,10 +12,10 @@ PROGRESS_SEARCH = "search"
 PROGRESS_CONVERT = "convert"
 
 class MultipleFilesFrame(customtkinter.CTkFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, converter, **kwargs):
         super().__init__(master, **kwargs)
     
-        self.converter = FileConverter()
+        self.converter = converter
         self.selected_directory = customtkinter.StringVar(master=self, value=NO_DIRECTORY_TEXT)
         self.file_list = {}
         self.output_format = customtkinter.StringVar(master=self, value=CHD)

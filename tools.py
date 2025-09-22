@@ -1,7 +1,7 @@
 # This is a utility library for converting different games
 import subprocess
 from pathlib import Path
-from exceptions import ChdmanNotInstalledError, FileConversionError, FileFormatNotSupportedError
+from exceptions import ChdmanNotInstalledError, SameFileExtensionError, FileFormatNotSupportedError
 from constants import *
 
 # File Formats
@@ -23,7 +23,7 @@ class FileConverter:
         if not input_file.exists():
             raise FileNotFoundError()
         if input_file.suffix == output_format:
-            raise FileConversionError()
+            raise SameFileExtensionError()
 
         output_file = output_directory / Path(input_file.stem + output_format)
         if output_format == CHD:
