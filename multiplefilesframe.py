@@ -2,7 +2,7 @@ from tkinter.filedialog import askdirectory
 import customtkinter
 from pathlib import Path
 import threading
-from exceptions import ProgressBarException, SameFileExtensionError, FileFormatNotSupportedError
+from exceptions import ProgressBarException, SameFileExtensionError, FileFormatNotSupportedError, OutputFileAlreadyExists
 from constants import *
 
 NO_DIRECTORY_TEXT = "No directory selected"
@@ -203,14 +203,16 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
                         output_directory=Path(f).parent,
                         output_format=self.output_format.get()
                     )
-                except (SameFileExtensionError, FileFormatNotSupportedError) as e:
+                except (SameFileExtensionError, FileFormatNotSupportedError, OutputFileAlreadyExists, Exception) as e:
                     error_found = True
                     if type(e) is SameFileExtensionError:
                         error_text = f"Error - Already in format"
                     elif type(e) is FileFormatNotSupportedError:
                         error_text = f"Error - Format not supported"
+                    elif type(e) is OutputFileAlreadyExists:
+                        error_text = f"Error - Output file already exists cannot overwrite"
                     else:
-                        error_text = f"Error - unknown error"
+                        error_text = f"Error - Unknown error"
                 finally:
                     current_text = switch.cget("text")
                     current_text = current_text[0:current_text.rfind(":")+1]

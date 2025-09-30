@@ -15,3 +15,7 @@ class FileFormatNotSupportedError(Exception):
 class SameFileExtensionError(Exception):
     def __init__(self, *args):
         super().__init__(*args)
+
+class OutputFileAlreadyExists(Exception):
+    def __init__(self, *args):
+        super().__init__(*args)
