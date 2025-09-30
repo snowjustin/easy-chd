@@ -2,7 +2,7 @@ from tkinter.filedialog import askdirectory
 import customtkinter
 from pathlib import Path
 import threading
-from exceptions import ProgressBarException
+from exceptions import ProgressBarException, SameFileExtensionError, FileFormatNotSupportedError
 from constants import *
 
 NO_DIRECTORY_TEXT = "No directory selected"
@@ -18,6 +18,7 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
         self.converter = converter
         self.selected_directory = customtkinter.StringVar(master=self, value=NO_DIRECTORY_TEXT)
         self.file_list = {}
+        self.longest_filename = 0
         self.output_format = customtkinter.StringVar(master=self, value=CHD)
         self.scrollable_frame_switches = []  # stores widgets displayed in scrollable list.
         self.label_font = customtkinter.CTkFont(size=15)
@@ -121,6 +122,8 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
         # Actually walk the path and build a list of components with files.
         def build_file_list():
             self.file_list = {}
+            self.longest_filename = 0
+
             directory_path = Path(self.selected_directory.get())
             for file_path in directory_path.rglob('*'):
                 if file_path.is_file() and str.lower(file_path.suffix) in VALID_FORMATS:
@@ -129,6 +132,10 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
                         "filetype": file_path.suffix,
                         "convertstate": customtkinter.IntVar(master=self)
                     }
+
+                # used for fixed length display of switch text.
+                if len(file_path.stem) > self.longest_filename:
+                    self.longest_filename = len(file_path.stem)
             
             # Let the app go back to functioning as normal
             self.toggle_ui_state("enabled")
@@ -148,11 +155,18 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
             for f in self.file_list.keys():
                 fname = self.file_list[f]["filename"]
                 ftype = self.file_list[f]["filetype"]
+                if len(fname) < self.longest_filename:
+                    switch_text = f"{fname.ljust(self.longest_filename)}  FORMAT: {ftype}  STATUS: unconverted"
+                else:
+                    switch_text = f"{fname}  FORMAT: {ftype}  STATUS: unconverted"
+
                 switch = customtkinter.CTkCheckBox(
-                    master=self.scrollable_frame, 
-                    text=f"{fname} - {ftype}",
+                    master=self.scrollable_frame,
+                    font=customtkinter.CTkFont(family="Courier New", size=12),
+                    text=switch_text,
                     variable=self.file_list[f]["convertstate"]
                 )
+                self.file_list[f]["switch"] = switch  # keep a reference to the switch here. BUG_TEST
                 switch.grid(row=len(self.scrollable_frame_switches), column=0, padx=10, pady=(0, 20), sticky="w")
                 self.scrollable_frame_switches.append(switch)
         else:
@@ -177,18 +191,46 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
         self.progressbar.grid(row=10, column=1, columnspan=3, padx=(20, 20), pady=(10, 0), sticky="ew")
         
         def run_conversion():
-            current_file = 1
+            conversion_counter = 1
             for f in conversion_list:
-                self.progressbar_text.set(f"Converting {f} - {current_file}/{total_files}")
-                self.converter.convert_file(
-                    input_file=Path(f),
-                    output_directory=Path(f).parent,
-                    output_format=self.output_format.get()
-                )
-            
+                error_found = False
+                switch = self.file_list[f]["switch"]
+
+                try:
+                    self.progressbar_text.set(f"Converting {f} - {conversion_counter}/{total_files}")
+                    self.converter.convert_file(
+                        input_file=Path(f),
+                        output_directory=Path(f).parent,
+                        output_format=self.output_format.get()
+                    )
+                except (SameFileExtensionError, FileFormatNotSupportedError) as e:
+                    error_found = True
+                    if type(e) is SameFileExtensionError:
+                        error_text = f"Error - Already in format"
+                    elif type(e) is FileFormatNotSupportedError:
+                        error_text = f"Error - Format not supported"
+                    else:
+                        error_text = f"Error - unknown error"
+                finally:
+                    current_text = switch.cget("text")
+                    current_text = current_text[0:current_text.rfind(":")+1]
+
+                    if error_found:
+                        switch.configure(
+                            text=current_text+f" "+error_text,
+                            text_color="red"
+                        )
+                    else:
+                        switch.configure(
+                            text=current_text+f" Converted successfully",
+                            text_color="green"
+                        )
+                    conversion_counter += 1
+
+
             self.toggle_ui_state()
             self.interact_with_progressbar(state=PROGRESS_STOP)
-            self.progressbar_text.set(f"Conversion Completed.")
+            self.progressbar_text.set(f"Conversion(s) Completed.")
         
         # Begin the conversion in a different thread
         threading.Thread(target=run_conversion, daemon=True).start()
