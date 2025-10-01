@@ -46,9 +46,10 @@ class FileConverter:
         else:
             self.conversion_result = self.__convert_chd_to_gdi_cue(input_file=input_file, output_file=output_file)
         
-        if not self.conversion_result.returncode:
-            if intermediary_file != None:
+        if intermediary_file != None:
                 remove(intermediary_file)
+                
+        if not self.conversion_result.returncode:
             return True, self.conversion_result
         else:
             return False, self.conversion_result

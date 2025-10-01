@@ -152,7 +152,7 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
 
         # Draw new list
         if self.file_list != {}:
-            for f in self.file_list.keys():
+            for f in sorted(self.file_list.keys()):
                 fname = self.file_list[f]["filename"]
                 ftype = self.file_list[f]["filetype"]
                 if len(fname) < self.longest_filename:
@@ -176,18 +176,15 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
 
     def convert_files(self):
         """Convert selected files from checkboxes into desired format."""
-        # Update UI
-        self.toggle_ui_state("disabled")
-        self.interact_with_progressbar(state=PROGRESS_START, mode=PROGRESS_CONVERT)
         conversion_list = [f for f in self.file_list.keys() if self.file_list[f]["convertstate"].get()]
         total_files = len(conversion_list)
         
-        # Exit the function and fix UI if there are no files selected for conversion
         if total_files == 0:
-            self.toggle_ui_state()
-            self.interact_with_progressbar(state=PROGRESS_STOP)
             return
         
+        # Update UI
+        self.toggle_ui_state("disabled")
+        self.interact_with_progressbar(state=PROGRESS_START, mode=PROGRESS_CONVERT)
         self.progressbar.grid(row=10, column=1, columnspan=3, padx=(20, 20), pady=(10, 0), sticky="ew")
         
         def run_conversion():
@@ -198,11 +195,15 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
 
                 try:
                     self.progressbar_text.set(f"Converting {f} - {conversion_counter}/{total_files}")
-                    self.converter.convert_file(
+                    result, completed_process = self.converter.convert_file(
                         input_file=Path(f),
                         output_directory=Path(f).parent,
                         output_format=self.output_format.get()
                     )
+                    error_found = not result
+                    if error_found:
+                        error_text = f"Error - {str(completed_process.stderr.decode())}"
+
                 except (SameFileExtensionError, FileFormatNotSupportedError, OutputFileAlreadyExists, Exception) as e:
                     error_found = True
                     if type(e) is SameFileExtensionError:
@@ -230,7 +231,7 @@ class MultipleFilesFrame(customtkinter.CTkFrame):
                     conversion_counter += 1
 
 
-            self.toggle_ui_state()
+            self.toggle_ui_state("enabled")
             self.interact_with_progressbar(state=PROGRESS_STOP)
             self.progressbar_text.set(f"Conversion(s) Completed.")
         
