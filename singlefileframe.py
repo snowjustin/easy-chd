@@ -2,8 +2,7 @@ from tkinter.filedialog import askopenfilename
 import customtkinter
 from pathlib import Path
 import threading
-from tools import FileConverter
-from exceptions import ProgressBarException
+from exceptions import ProgressBarException, SameFileExtensionError, FileFormatNotSupportedError
 
 VALID_FILE_TYPES = ['.chd', '.cue', '.gdi', '.iso']
 NO_FILE_TEXT = "No file selected"
@@ -11,10 +10,10 @@ NO_FILE_TEXT = "No file selected"
 
 
 class SingleFileFrame(customtkinter.CTkFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, converter, **kwargs):
         super().__init__(master, **kwargs)
 
-        self.converter = FileConverter()
+        self.converter = converter
         self.selected_file = customtkinter.StringVar(master=self, value=NO_FILE_TEXT)
         self.output_format = customtkinter.StringVar(master=self, value='.chd')
         self.LABEL_FONT = customtkinter.CTkFont(size=15)
@@ -105,16 +104,30 @@ class SingleFileFrame(customtkinter.CTkFrame):
         self.interact_with_progressbar(state="start")
         
         def run_conversion():
-            self.progressbar_text.set(f"Converting file...")
-            self.converter.convert_file(
-                input_file=Path(self.selected_file.get()),
-                output_directory=Path(self.selected_file.get()).parent,
-                output_format=self.output_format.get()
-            )
+            output_format = self.output_format.get()
             
-            self.toggle_ui_state()
-            self.interact_with_progressbar(state="stop")
-            self.progressbar_text.set(f"Conversion Completed")
+            try:
+                self.progressbar_text.set(f"Converting file...")
+                results = self.converter.convert_file(
+                    input_file=Path(self.selected_file.get()),
+                    output_directory=Path(self.selected_file.get()).parent,
+                    output_format=output_format
+                )
+                
+                if results[0]:
+                    result_text = f"Conversion Completed"
+                else:
+                    
+                    result_text = f"Conversion Failed"
+            except (SameFileExtensionError, FileFormatNotSupportedError) as e:
+                if type(e) is SameFileExtensionError:
+                    result_text = f"Conversion Failed - File already has type of {output_format}"
+                else:
+                    result_text = f"Conversion Failed - Selected file can not be converted"
+            finally:
+                self.toggle_ui_state()
+                self.interact_with_progressbar(state="stop")
+                self.progressbar_text.set(result_text)
         
         # Begin the conversion in a different thread
         threading.Thread(target=run_conversion, daemon=True).start()

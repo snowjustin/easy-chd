@@ -1,6 +1,8 @@
 import customtkinter
 from multiplefilesframe import MultipleFilesFrame
 from singlefileframe import SingleFileFrame
+from tools import FileConverter
+from exceptions import ChdmanNotInstalledError
 
 # Theme settings
 customtkinter.set_appearance_mode("System")
@@ -18,6 +20,11 @@ class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
         self.title(APP_TITLE)
+        try:
+            file_converter = FileConverter()
+        except ChdmanNotInstalledError as e:
+            file_converter = None
+            
 
         # Font settings
         self.title_font = customtkinter.CTkFont(size=30, weight="bold", slant="italic")
@@ -43,10 +50,10 @@ class App(customtkinter.CTk):
             expand=True
         )
         self.sf_tab = self.tabview.add(SF_TAB)
-        self.sf_view = SingleFileFrame(self.sf_tab)
+        self.sf_view = SingleFileFrame(self.sf_tab, file_converter)
         self.sf_view.pack()
         self.mf_tab = self.tabview.add(MF_TAB)
-        self.mf_view = MultipleFilesFrame(self.mf_tab)
+        self.mf_view = MultipleFilesFrame(self.mf_tab, file_converter)
         self.mf_view.pack()
         self.tabview.set(SF_TAB)
 
