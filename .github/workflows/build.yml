@@ -3,7 +3,7 @@ name: Cross Platform EasyCHD Build
 on:
   push:
     branches:
-      - release
+      - main
 
 jobs:
   build:
