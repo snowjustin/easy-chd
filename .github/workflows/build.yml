@@ -1,0 +1,72 @@
+name: Cross Platform EasyCHD Build
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: x64
+          - os: windows-latest
+            arch: x64
+          - os: macos-15-intel
+            arch: x64
+          - os: macos-latest
+            arch: arm64
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+        
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Install project dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Build binary
+        run: |
+          echo "Building for ${{ matrix.os }} ${{ matrix.arch }}"
+          mkdir -p dist
+
+          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            if [[ "${{ matrix.arch }}" == "arm64" ]]; then
+              # Cross compile for Apple Silicon
+              pyinstaller --onefile --target-arch=arm64 -n=easyCHD -i=icon.png app.py
+            else
+              # Intel build
+              pyinstaller --onefile -n=easyCHD -i=icon.png app.py
+            fi
+          else
+            # Linux or Windows
+            pyinstaller --onefile -n=easyCHD -i=icon.png app.py
+          fi
+
+      - name: Archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: easyCHD-${{ matrix.os }}-${{ matrix.arch }}
+          path: dist/*
