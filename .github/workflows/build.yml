@@ -59,11 +59,7 @@ jobs:
         run: |
           echo "Building for ${{ matrix.os }} ${{ matrix.arch }}"
           mkdir -p dist
-          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            pyinstaller --onefile --target-arch=arm64 -n=easyCHD -i=icon.png src/app.py
-          else
-            pyinstaller --onefile -n=easyCHD -i=icon.png src/app.py
-          fi
+          pyinstaller --onefile -n=easyCHD -i=icon.png src/app.py
 
       - name: Package binary
         run: |
