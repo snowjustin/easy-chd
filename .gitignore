@@ -3,3 +3,6 @@ test
 __pycache__/
 .DS_Store
 .conda/
+dist/
+build/
+*.spec
