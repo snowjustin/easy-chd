@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: actions/create-release@v4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -50,7 +50,7 @@ jobs:
                 pyinstaller --onefile -n=easyCHD -i=icon.png src/app.py &&
                 cd dist/ &&
                 zip -r9 easyCHD easyCHD.app/
-            OUT_FILE_NAME: easyCHD.zip
+            OUT_FILE_NAME: easyCHD-macOS-intel.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
