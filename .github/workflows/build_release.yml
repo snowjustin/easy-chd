@@ -68,6 +68,6 @@ jobs:
      
       - name: Create Github release
         run: | 
-          gh release create --generate-notes ./binaries/*/*.tar.gz
+          gh release create "${GITHUB_REF_NAME}" --generate-notes ./binaries/*/*.tar.gz
         env:
           GH_TOKEN: ${{ github.token }}
