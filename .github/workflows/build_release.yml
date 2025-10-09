@@ -32,4 +32,4 @@ jobs:
     - name: Build with Pyinstaller on ${{ matrix.os }}
       if: matrix.os == 'macos-15-intel'
       run: |
-        pyinstaller --onefile --target-arch=arm64 -n=easyCHD -i=icon.png src/app.py
+        pyinstaller --onefile -n=easyCHD -i=icon.png src/app.py
