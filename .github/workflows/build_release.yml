@@ -42,11 +42,11 @@ jobs:
       run: | 
         BIN_NAME="easyCHD-${{ matrix.binary-name }}"
         mv dist/* "$BIN_NAME"
-        tar -czf "${APP_NAME}.tar.gz" "$BIN_NAME"
+        tar -czf "${BIN_NAME}.tar.gz" "$BIN_NAME"
         rm "$BIN_NAME"
 
     - name: Archive artifacts
       uses: actions/upload-artifact@v4
       with:
         name: easyCHD-${{ matrix.binary-name }}
-        path: easyCHD-*
+        path: easyCHD
