@@ -6,7 +6,10 @@ on:
     
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['macos-latest', 'macos-15-intel']
 
     steps:
     - uses: actions/checkout@v5
@@ -21,6 +24,12 @@ jobs:
         pip install pyinstaller pillow
         pip install -r requirements.txt
 
-    - name: Build with Pyinstaller
+    - name: Build with Pyinstaller on ${{ matrix.os }}
+      if: matrix.os == 'macos-latest'
+      run: |
+        pyinstaller --onefile --target-arch=arm64 -n=easyCHD -i=icon.png src/app.py
+
+    - name: Build with Pyinstaller on ${{ matrix.os }}
+      if: matrix.os == 'macos-15-intel'
       run: |
         pyinstaller --onefile --target-arch=arm64 -n=easyCHD -i=icon.png src/app.py
