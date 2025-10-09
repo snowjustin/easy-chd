@@ -9,7 +9,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['macos-latest', 'macos-15-intel']
+        include:
+        - os: 'macos-latest'
+          binary-name: 'macos-arm64'
+        - os: 'macos-15-intel'
+          binary-name: 'macos-intel'
 
     steps:
     - uses: actions/checkout@v5
@@ -36,8 +40,7 @@ jobs:
 
     - name: Package Builds
       run: | 
-        APP_NAME="easyCHD-${{ matrix.os }}"
-        BIN_NAME="${APP_NAME}"
+        BIN_NAME="easyCHD-${{ matrix.binary-name }}"
         mv dist/* "$BIN_NAME"
         tar -czf "${APP_NAME}.tar.gz" "$BIN_NAME"
         rm "$BIN_NAME"
@@ -45,5 +48,5 @@ jobs:
     - name: Archive artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: binary-${{ matrix.os }}
+        name: easyCHD-${{ matrix.binary-name }}
         path: easyCHD-*
