@@ -50,3 +50,17 @@ jobs:
       with:
         name: binary-easyCHD-${{ matrix.binary-name }}
         path: easyCHD-${{ matrix.binary-name }}.tar.gz
+
+  release:
+    name: Publish Github build release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download binaries
+        uses: actions/download-artifact@v5
+        with:
+          path: ./binaries
+     
+      - name: Create Github release
+        run: | 
+          gh release create --generate-notes ./binaries/*
