@@ -41,3 +41,9 @@ jobs:
         mv dist/* "$BIN_NAME"
         tar -czf "${APP_NAME}.tar.gz" "$BIN_NAME"
         rm "$BIN_NAME"
+
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: binary-${{ matrix.os }}
+        path: easyCHD-*
