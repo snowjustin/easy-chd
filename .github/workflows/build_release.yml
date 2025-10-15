@@ -2,7 +2,8 @@ name: Build EasyCHD for release
 
 on:
   push:
-    branches: ["github-action-testing"]
+    tags:
+      - "v*"
     
 jobs:
   build:
