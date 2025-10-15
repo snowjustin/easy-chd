@@ -9,5 +9,11 @@ This utility provides a graphical interface for converting files between differe
     ```
     chdman - MAME Compressed Hunks of Data (CHD) manager X.XXX (unknown)
     ```
-- Install required python packages using `pip install -r requirements.txt`
-- Run `python app.py` from a terminal
+
+- Binaries are available for both intel and arm64 flavors of macOS.
+
+- If downloading the source to run the application:
+  - Runs with verion *3.11+* of Python
+  - Install required python packages using `pip install -r requirements.txt`
+  - Run `python app.py` from a terminal
+
